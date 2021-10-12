@@ -44,7 +44,7 @@ def get_choice(prompt, choices):
         choice = input(prompt)
     return choice
 
-def shoot_random(ship_grid, shot_grid, shots, counter):
+def shoot_random(ship_grid, shot_grid):
     while True:
         shot_x = random.randint(0,9)
         shot_y = random.randint(0,9)
@@ -63,7 +63,7 @@ def shoot_random(ship_grid, shot_grid, shots, counter):
         print("HIT!")
         shot_grid[int(shot_y)][int(shot_x)] = ["HIT!"]
         ship_grid[int(shot_y)][int(shot_x)] = ["HIT!"]
-        counter+=1
+        
     print_grid(shot_grid)
 
 def shoot(player, ship_grid, shot_grid):
