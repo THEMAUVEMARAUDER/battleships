@@ -1,7 +1,6 @@
 #imports
-import random
 
-#global variables
+import random
 
 
 # functions
@@ -33,7 +32,7 @@ def print_grid(grid):
     print("\n", line)
 
     for n in range(len(grid)):
-        print(n, grid[n])
+        print(n, grid[n], "\n")
     print("\n")
 
 def get_choice(prompt, choices):
@@ -44,7 +43,29 @@ def get_choice(prompt, choices):
         print(f"{choice} is not a valid choice, try again:")
         choice = input(prompt)
     return choice
-# error handling on user inputs, include quit !
+
+def shoot_random(ship_grid, shot_grid, shots, counter):
+    while True:
+        shot_x = random.randint(0,9)
+        shot_y = random.randint(0,9)
+
+        if shot_grid[shot_y][shot_x] == ["    "]:
+            break
+        else:
+            continue
+
+        print(f"\nFiring at {shot_x},{shot_y}")
+
+    if ship_grid[int(shot_y)][int(shot_x)] == ["    "]:
+        print("MISS")
+        shot_grid[int(shot_y)][int(shot_x)] = ["MISS"]
+    else:
+        print("HIT!")
+        shot_grid[int(shot_y)][int(shot_x)] = ["HIT!"]
+        ship_grid[int(shot_y)][int(shot_x)] = ["HIT!"]
+        counter+=1
+    print_grid(shot_grid)
+
 def shoot(player, ship_grid, shot_grid):
     print(f"\n{player}'s firing chart:")
     print_grid(shot_grid)
@@ -58,6 +79,9 @@ def shoot(player, ship_grid, shot_grid):
             shot = response.split()
             shot_x = int(shot[0])
             shot_y = int(shot[1])
+            if shot_grid[shot_y][shot_x] != ["    "]:
+                print("This space has already been fired on.")
+                raise ValueError("just here to end the try block")
             break
         except:
             print("Invalid input, try again:")
@@ -82,14 +106,8 @@ def win_check(player, ship_grid):
     if counter >= (len(ship_grid) * len(ship_grid)):
         print(f"Congratulations {player}, you have sunk all the enemy vessels !")
         exit()
-# error handling on user inputs, include quit !
-def ship_setup(player, ship_grid):
-    ships = [[["Ca-1"],["Ca-2"],["Ca-3"],["Ca-4"],["Ca-5"],"Carrier",5],
-             [["Ba-1"],["Ba-2"],["Ba-3"],["Ba-4"],"Battleship",4],
-             [["De-1"],["De-2"],["De-3"],"Destroyer",3],
-             [["Su-1"],["Su-2"],["Su-3"],"Submarine",3],
-             [["Pa-1"],["Pa-2"],"Patrol Boat",2]]
 
+def ship_setup(player, ship_grid):
     min_x = 0
     max_x = len(ship_grid[0]) - 1
     min_y = 0
@@ -154,12 +172,6 @@ def ship_setup(player, ship_grid):
         print_grid(ship_grid)
 
 def ship_setup_random(ship_grid):
-    ships = [[["Ca-1"],["Ca-2"],["Ca-3"],["Ca-4"],["Ca-5"],"Carrier",5],
-             [["Ba-1"],["Ba-2"],["Ba-3"],["Ba-4"],"Battleship",4],
-             [["De-1"],["De-2"],["De-3"],"Destroyer",3],
-             [["Su-1"],["Su-2"],["Su-3"],"Submarine",3],
-             [["Pa-1"],["Pa-2"],"Patrol Boat",2]]
-
     min_x = 0
     max_x = len(ship_grid[0]) - 1
     min_y = 0
@@ -203,10 +215,10 @@ def ship_setup_random(ship_grid):
                     for n in range(0, len(ship)-2):
                         ship_grid[pos_y][pos_x - n] = ship[n]
 
-
 def game(play):
+
     print("1 or 2 player game ?")
-    play_type = get_choice("1/2 > ", ["1", "2"])
+    play_type = get_choice("1/2 > ", ["1", "2", "3"])
     if play_type == "2":
         print("Name of first player ?")
         player1 = input("> ")
@@ -234,6 +246,50 @@ def game(play):
             win_check(player1, p2_ship_grid)
             shoot(player2, p1_ship_grid, p2_shot_grid)
             win_check(player2, p1_ship_grid)
+
+    elif play_type == "1":
+        print("Name of first player ?")
+        player1 = input("> ")
+        player2 = "Captain Computer"
+
+        print("How would you like to place the ships\n1: personally\n2: randomly")
+        response = get_choice("1/2 > ", ["1", "2"])
+        if response == "1":
+            pass
+            spacer(f"Avast {player1} ! setup your fleet.")
+            ship_setup(player1, p1_ship_grid)
+            spacer(f"Avast {player2} ! setup your fleet.")
+            ship_setup_random(p2_ship_grid)
+        else:
+            ship_setup_random(p1_ship_grid)
+            ship_setup_random(p2_ship_grid)
+
+        spacer(f"Ahoy thar, here comes the fleet of {player2} looking for trouble")
+        spacer("LET BATTLE COMMENCE !")
+        turn = 0
+        while play:
+            turn += 1
+            print(f"Turn {turn}")
+            shoot(player1, p2_ship_grid, p1_shot_grid)
+            win_check(player1, p2_ship_grid)
+            shoot_random(p1_ship_grid, p2_shot_grid)
+            win_check(player2, p1_ship_grid)
+
+    elif play_type == "3":
+        player1 = "Admiral AI"
+        player2 = "Captain Computer"
+        ship_setup_random(p1_ship_grid)
+        ship_setup_random(p2_ship_grid)
+        spacer("Exhibition battle mode engaged!")
+        turn = 0
+
+        while play:
+            turn += 1
+            print(f"Turn {turn}")
+            shoot_random(p2_ship_grid, p1_shot_grid)
+            win_check(player1, p2_ship_grid)
+            shoot_random(p1_ship_grid, p2_shot_grid)
+            win_check(player2, p1_ship_grid)
     else:
         print("Not sure what you mean :)")
         exit()
@@ -252,11 +308,26 @@ def main(play):
             exit()
 
 
+#global variables
 
-# tests
+ships = [[["Ca-1"],["Ca-2"],["Ca-3"],["Ca-4"],["Ca-5"],"Carrier",5],
+         [["Ba-1"],["Ba-2"],["Ba-3"],["Ba-4"],"Battleship",4],
+         [["De-1"],["De-2"],["De-3"],"Destroyer",3],
+         [["Su-1"],["Su-2"],["Su-3"],"Submarine",3],
+         [["Pa-1"],["Pa-2"],"Patrol Boat",2]]
+
+p1_shots = []
+p2_shots = []
+
+p1_counter = 0
+p2_counter = 0
+
 p1_ship_grid = new_grid(10, 10)
 p1_shot_grid = new_grid(10, 10)
 p2_ship_grid = new_grid(10, 10)
 p2_shot_grid = new_grid(10, 10)
+
+
+# tests
 
 main(True)
